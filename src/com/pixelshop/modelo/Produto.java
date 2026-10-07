@@ -1,88 +1,110 @@
 package com.pixelshop.modelo;
 
-public class Produto {
+import java.util.Objects;
 
-        // --- Atributos Privados (Encapsulamento) ---
-        private String nome;
-        private double preco;
-        private int quantidadeEstoque;
+public abstract class Produto {
+    // Atributos protegidos para permitir acesso direto pelas subclasses
+    protected String nome;
+    protected double preco;
+    protected int quantidadeEstoque;
 
-        // --- Construtor ---
-        public Produto(String nome, double precoInicial, int quantidadeInicial) {
-            this.nome = nome;
+    // Membro estático global para contagem de itens criados
+    private static int totalProdutosCadastrados = 0;
 
-            // Validação do preço inicial: se negativo, atribui 0.0
-            if (precoInicial < 0) {
-                this.preco = 0.0;
-            } else {
-                this.preco = precoInicial;
-            }
-
-            // Validação da quantidade inicial: se negativo, atribui 0
-            if (quantidadeInicial < 0) {
-                this.quantidadeEstoque = 0;
-            } else {
-                this.quantidadeEstoque = quantidadeInicial;
-            }
+    // Construtor
+    public Produto(String nome, double precoInicial, int quantidadeInicial) {
+        if (precoInicial < 0) {
+            throw new IllegalArgumentException("O preço inicial não pode ser negativo.");
+        }
+        if (quantidadeInicial < 0) {
+            throw new IllegalArgumentException("A quantidade inicial não pode ser negativa.");
         }
 
-        // --- Getters ---
-        public String getNome() {
-            return this.nome;
-        }
+        this.nome = nome;
+        this.preco = precoInicial;
+        this.quantidadeEstoque = quantidadeInicial;
 
-        public double getPreco() {
-            return this.preco;
-        }
+        // Incrementa o contador global
+        totalProdutosCadastrados++;
+    }
 
-        public int getQuantidadeEstoque() {
-            return this.quantidadeEstoque;
-        }
+    // Getter do membro estático
+    public static int getTotalProdutosCadastrados() {
+        return totalProdutosCadastrados;
+    }
 
-        // --- Setters com Validação (Retornam boolean) ---
-        public boolean setPreco(double preco) {
-            // O preço deve ser maior que zero
-            if (preco > 0) {
-                this.preco = preco;
-                return true;
-            } else {
-                System.out.println("Erro: O preço deve ser maior que zero!");
-                return false;
-            }
-        }
+    // Getters
+    public String getNome() {
+        return this.nome;
+    }
 
-        public boolean setQuantidadeEstoque(int quantidade) {
-            // O estoque não pode ser negativo
-            if (quantidade >= 0) {
-                this.quantidadeEstoque = quantidade;
-                return true;
-            } else {
-                System.out.println("Erro: A quantidade de estoque não pode ser negativa!");
-                return false;
-            }
-        }
+    public double getPreco() {
+        return this.preco;
+    }
 
-        // --- Métodos Operacionais ---
-        public boolean adicionarEstoque(int qtd) {
-            // Adiciona quantidade se o valor for maior que zero
-            if (qtd > 0) {
-                this.quantidadeEstoque += qtd;
-                return true;
-            } else {
-                System.out.println("Erro: Quantidade a adicionar deve ser maior que zero!");
-                return false;
-            }
-        }
+    public int getQuantidadeEstoque() {
+        return this.quantidadeEstoque;
+    }
 
-        public boolean removerEstoque(int qtd) {
-            // Remove se o valor for maior que zero E houver saldo suficiente
-            if (qtd > 0 && qtd <= this.quantidadeEstoque) {
-                this.quantidadeEstoque -= qtd;
-                return true;
-            } else {
-                System.out.println("Erro: Quantidade inválida ou estoque insuficiente!");
-                return false;
-            }
+    // Setters com validações (Mantidos do seu código original)
+    public boolean setPreco(double preco) {
+        if (preco > 0) {
+            this.preco = preco;
+            return true;
+        } else {
+            System.out.println("Erro: O preço deve ser maior que zero!");
+            return false;
         }
+    }
+
+    public boolean setQuantidadeEstoque(int quantidade) {
+        if (quantidade >= 0) {
+            this.quantidadeEstoque = quantidade;
+            return true;
+        } else {
+            System.out.println("Erro: A quantidade de estoque não pode ser negativa!");
+            return false;
+        }
+    }
+
+    // Métodos Operacionais
+    public boolean adicionarEstoque(int qtd) {
+        if (qtd > 0) {
+            this.quantidadeEstoque += qtd;
+            return true;
+        } else {
+            System.out.println("Erro: Quantidade a adicionar deve ser maior que zero!");
+            return false;
+        }
+    }
+
+    public boolean removerEstoque(int qtd) {
+        if (qtd > 0 && qtd <= this.quantidadeEstoque) {
+            this.quantidadeEstoque -= qtd;
+            return true;
+        } else {
+            System.out.println("Erro: Quantidade inválida ou estoque insuficiente!");
+            return false;
+        }
+    }
+
+    // Sobrescrita do equals() para evitar duplicidades no sistema (com base no nome)
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Produto produto = (Produto) obj;
+        return Objects.equals(nome.toLowerCase(), produto.nome.toLowerCase());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nome.toLowerCase());
+    }
+
+    // Sobrescrita do toString() para exibição textual formatada
+    @Override
+    public String toString() {
+        return String.format("Nome: %s | Preço: R$ %.2f | Estoque: %d", nome, preco, quantidadeEstoque);
+    }
 }
-

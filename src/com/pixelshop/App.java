@@ -1,132 +1,185 @@
 package com.pixelshop;
 
-import com.pixelshop.modelo.Produto;
+import com.pixelshop.modelo.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class App {
+    private static List<Produto> estoque = new ArrayList<>();
+    private static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        int opcao = -1;
 
-        // Armazenando produtos em variáveis de referência
-        Produto produto1 = null;
-        Produto produto2 = null;
-
-        int opcao = 0;
-
-        do {
-            System.out.println("\n==================================");
-            System.out.println("      PIXELSHOP - MENU DE GESTÃO  ");
-            System.out.println("==================================");
-            System.out.println("1. Cadastrar novo produto");
-            System.out.println("2. Consultar dados e valor total em estoque");
-            System.out.println("3. Realizar entrada (adição) de estoque");
-            System.out.println("4. Realizar saída (remoção) de estoque");
-            System.out.println("5. Alterar preço de um produto");
-            System.out.println("6. Sair");
-            System.out.print("Escolha uma opção: ");
-
-            opcao = scanner.nextInt();
-            scanner.nextLine(); // Limpa o buffer do teclado
-
-            switch (opcao) {
-                case 1:
-                    System.out.print("Deseja cadastrar no Produto 1 ou 2? ");
-                    int numProd = scanner.nextInt();
-                    scanner.nextLine();
-
-                    System.out.print("Nome do produto: ");
-                    String nome = scanner.nextLine();
-                    System.out.print("Preço inicial: R$ ");
-                    double preco = scanner.nextDouble();
-                    System.out.print("Estoque inicial: ");
-                    int qtd = scanner.nextInt();
-
-                    if (numProd == 1) {
-                        produto1 = new Produto(nome, preco, qtd);
-                        System.out.println("Produto 1 cadastrado com sucesso!");
-                    } else if (numProd == 2) {
-                        produto2 = new Produto(nome, preco, qtd);
-                        System.out.println("Produto 2 cadastrado com sucesso!");
-                    } else {
-                        System.out.println("Opção de produto inválida!");
-                    }
-                    break;
-
-                case 2:
-                    System.out.print("Consultar Produto (1 ou 2): ");
-                    int pConsulta = scanner.nextInt();
-                    Produto pSel = (pConsulta == 1) ? produto1 : (pConsulta == 2) ? produto2 : null;
-
-                    if (pSel != null) {
-                        double valorTotal = pSel.getPreco() * pSel.getQuantidadeEstoque();
-                        System.out.println("\n--- Dados do Produto ---");
-                        System.out.println("Nome: " + pSel.getNome());
-                        System.out.println("Preço Unitário: R$ " + pSel.getPreco());
-                        System.out.println("Estoque: " + pSel.getQuantidadeEstoque());
-                        System.out.println("Valor Total em Estoque: R$ " + valorTotal);
-                    } else {
-                        System.out.println("Produto não cadastrado ou seleção inválida!");
-                    }
-                    break;
-
-                case 3:
-                    System.out.print("Adicionar estoque no Produto (1 ou 2): ");
-                    int pAdd = scanner.nextInt();
-                    Produto pAddObj = (pAdd == 1) ? produto1 : (pAdd == 2) ? produto2 : null;
-
-                    if (pAddObj != null) {
-                        System.out.print("Quantidade a adicionar: ");
-                        int addQtd = scanner.nextInt();
-                        if (pAddObj.adicionarEstoque(addQtd)) {
-                            System.out.println("Estoque atualizado com sucesso!");
-                        }
-                    } else {
-                        System.out.println("Produto não encontrado!");
-                    }
-                    break;
-
-                case 4:
-                    System.out.print("Remover estoque do Produto (1 ou 2): ");
-                    int pRem = scanner.nextInt();
-                    Produto pRemObj = (pRem == 1) ? produto1 : (pRem == 2) ? produto2 : null;
-
-                    if (pRemObj != null) {
-                        System.out.print("Quantidade a remover: ");
-                        int remQtd = scanner.nextInt();
-                        if (pRemObj.removerEstoque(remQtd)) {
-                            System.out.println("Estoque reduzido com sucesso!");
-                        }
-                    } else {
-                        System.out.println("Produto não encontrado!");
-                    }
-                    break;
-
-                case 5:
-                    System.out.print("Alterar preço do Produto (1 ou 2): ");
-                    int pAlt = scanner.nextInt();
-                    Produto pAltObj = (pAlt == 1) ? produto1 : (pAlt == 2) ? produto2 : null;
-
-                    if (pAltObj != null) {
-                        System.out.print("Novo preço: R$ ");
-                        double novoPreco = scanner.nextDouble();
-                        if (pAltObj.setPreco(novoPreco)) {
-                            System.out.println("Preço alterado com sucesso!");
-                        }
-                    } else {
-                        System.out.println("Produto não encontrado!");
-                    }
-                    break;
-
-                case 6:
-                    System.out.println("Saindo do sistema PixelShop... Até logo!");
-                    break;
-
-                default:
-                    System.out.println("Opção inválida! Tente novamente.");
+        while (opcao != 0) {
+            exibirMenu();
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+                switch (opcao) {
+                    case 1:
+                        cadastrarProduto();
+                        break;
+                    case 2:
+                        consultarEstoque();
+                        break;
+                    case 3:
+                        realizarEntradaEstoque();
+                        break;
+                    case 4:
+                        realizarSaidaEstoque();
+                        break;
+                    case 5:
+                        aplicarDescontoPromocional();
+                        break;
+                    case 6:
+                        exibirTotalizadorGlobal();
+                        break;
+                    case 0:
+                        System.out.println("Encerrando o sistema PixelShop...");
+                        break;
+                    default:
+                        System.out.println("Opção inválida! Tente novamente.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Erro: Por favor, insira um número válido.");
+            } catch (Exception e) {
+                System.out.println("Erro: " + e.getMessage());
             }
-
-        } while (opcao != 6);
-
+            System.out.println();
+        }
         scanner.close();
+    }
+
+    private static void exibirMenu() {
+        System.out.println("=========================================");
+        System.out.println("      PIXELSHOP - MENU DE GESTÃO         ");
+        System.out.println("=========================================");
+        System.out.println("1. Cadastrar novo produto");
+        System.out.println("2. Consultar dados e valor total em estoque");
+        System.out.println("3. Realizar entrada de estoque");
+        System.out.println("4. Realizar saída de estoque");
+        System.out.println("5. Aplicar descontos promocionais em lote");
+        System.out.println("6. Exibir totalizador global de produtos");
+        System.out.println("0. Sair");
+        System.out.print("Escolha uma opção: ");
+    }
+
+    private static void cadastrarProduto() {
+        System.out.println("\n--- Cadastrar Novo Produto ---");
+        System.out.println("1. Jogo Físico");
+        System.out.println("2. Jogo Digital");
+        System.out.print("Escolha o tipo de produto: ");
+        int tipo = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Nome do produto: ");
+        String nome = scanner.nextLine();
+
+        for (Produto p : estoque) {
+            Produto aux = (tipo == 1) ?
+                    new JogoFisico(nome, 0, 0, "", false) :
+                    new JogoDigital(nome, 0, 0, 0);
+
+            if (p.equals(aux)) {
+                System.out.println("Erro: Já existe um produto cadastrado com esse nome!");
+                return;
+            }
+        }
+
+        System.out.print("Preço inicial: R$ ");
+        double preco = Double.parseDouble(scanner.nextLine());
+
+        System.out.print("Quantidade em estoque: ");
+        int qtd = Integer.parseInt(scanner.nextLine());
+
+        if (tipo == 1) {
+            System.out.print("Plataforma: ");
+            String plataforma = scanner.nextLine();
+            System.out.print("Possui manual impresso? (s/n): ");
+            boolean manual = scanner.nextLine().trim().equalsIgnoreCase("s");
+
+            estoque.add(new JogoFisico(nome, preco, qtd, plataforma, manual));
+            System.out.println("Jogo Físico cadastrado com sucesso!");
+        } else if (tipo == 2) {
+            System.out.print("Tamanho do arquivo (GB): ");
+            double tamanhoGB = Double.parseDouble(scanner.nextLine());
+
+            estoque.add(new JogoDigital(nome, preco, qtd, tamanhoGB));
+            System.out.println("Jogo Digital cadastrado com sucesso!");
+        } else {
+            System.out.println("Tipo de produto inválido!");
+        }
+    }
+
+    private static void consultarEstoque() {
+        System.out.println("\n--- Consulta do Estoque ---");
+        if (estoque.isEmpty()) {
+            System.out.println("Nenhum produto cadastrado.");
+            return;
+        }
+
+        double valorTotalEstoque = 0;
+        for (Produto p : estoque) {
+            System.out.println(p);
+            valorTotalEstoque += (p.getPreco() * p.getQuantidadeEstoque());
+        }
+        System.out.printf("\nValor total do estoque: R$ %.2f\n", valorTotalEstoque);
+    }
+
+    private static void realizarEntradaEstoque() {
+        System.out.println("\n--- Entrada de Estoque ---");
+        Produto p = buscarProdutoPorNome();
+        if (p != null) {
+            System.out.print("Quantidade a adicionar: ");
+            int qtd = Integer.parseInt(scanner.nextLine());
+            if (p.adicionarEstoque(qtd)) {
+                System.out.println("Estoque atualizado com sucesso!");
+            }
+        }
+    }
+
+    private static void realizarSaidaEstoque() {
+        System.out.println("\n--- Saída de Estoque ---");
+        Produto p = buscarProdutoPorNome();
+        if (p != null) {
+            System.out.print("Quantidade a remover: ");
+            int qtd = Integer.parseInt(scanner.nextLine());
+            if (p.removerEstoque(qtd)) {
+                System.out.println("Estoque reduzido com sucesso!");
+            }
+        }
+    }
+
+    private static void aplicarDescontoPromocional() {
+        System.out.println("\n--- Aplicar Desconto Promocional em Lote ---");
+        System.out.print("Informe a % de desconto para produtos elegíveis: ");
+        double porcentagem = Double.parseDouble(scanner.nextLine());
+
+        int afetados = 0;
+        for (Produto p : estoque) {
+            if (p instanceof Promovivel) {
+                ((Promovivel) p).aplicarDesconto(porcentagem);
+                afetados++;
+            }
+        }
+        System.out.printf("Desconto aplicado com sucesso em %d item(ns)!\n", afetados);
+    }
+
+    private static void exibirTotalizadorGlobal() {
+        System.out.println("\n--- Totalizador Global de Produtos ---");
+        System.out.println("Total de produtos criados no sistema: " + Produto.getTotalProdutosCadastrados());
+    }
+
+    private static Produto buscarProdutoPorNome() {
+        System.out.print("Digite o nome do produto: ");
+        String nome = scanner.nextLine();
+        for (Produto p : estoque) {
+            if (p.getNome().equalsIgnoreCase(nome)) {
+                return p;
+            }
+        }
+        System.out.println("Produto não encontrado.");
+        return null;
     }
 }
